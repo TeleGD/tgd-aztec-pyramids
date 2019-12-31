@@ -1,9 +1,5 @@
 package games.aztecPyramids;
 
-import org.newdawn.slick.GameContainer;
-import org.newdawn.slick.Input;
-import org.newdawn.slick.state.StateBasedGame;
-
 public class Player {
 	private int floor;
 
@@ -35,10 +31,6 @@ public class Player {
 		twoPress = false;
 		threePress = false;
 		value=0;
-	}
-
-	public void update(GameContainer arg0, StateBasedGame arg1, int delta) {
-
 	}
 
 	public void isWinner() {
@@ -100,8 +92,6 @@ public class Player {
 	public int getFloor() {
 		return this.floor;
 	}
-
-	public void keyReleased(int key, char c) {}
 
 	public void keyEnabled() {
 		threePressEn = true;

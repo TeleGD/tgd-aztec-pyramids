@@ -4,10 +4,10 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.Font;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
-import org.newdawn.slick.Input;
+import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
 
-public abstract class AppPage extends AppState {
+public abstract class AppPage extends BasicGameState {
 
 	static protected Color foregroundColor;
 	static protected Color backgroundColor;
@@ -86,8 +86,15 @@ public abstract class AppPage extends AppState {
 	private int hintBlinkPeriod;
 	private int hintBlinkCountdown;
 
+	private int ID;
+
 	public AppPage(int ID) {
-		super(ID);
+		this.ID = ID;
+	}
+
+	@Override
+	public int getID() {
+		return this.ID;
 	}
 
 	@Override
@@ -119,19 +126,6 @@ public abstract class AppPage extends AppState {
 		this.setSubtitle("");
 		this.setHint("");
 	}
-
-	@Override
-	public final void enter(GameContainer container, StateBasedGame game) {
-		AppInput appInput = (AppInput) container.getInput();
-		appInput.clearKeyPressedRecord();
-		appInput.clearControlPressedRecord();
-	}
-
-	@Override
-	public final void leave(GameContainer container, StateBasedGame game) {}
-
-	@Override
-	public void poll(GameContainer container, StateBasedGame game, Input user) {}
 
 	@Override
 	public void update(GameContainer container, StateBasedGame game, int delta) {

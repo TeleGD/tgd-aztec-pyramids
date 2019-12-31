@@ -1,13 +1,20 @@
+import java.awt.DisplayMode;
+import java.awt.GraphicsEnvironment;
+
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
-import app.AppGame;
+import org.newdawn.slick.AppGameContainer;
+import org.newdawn.slick.GameContainer;
+import org.newdawn.slick.SlickException;
+import org.newdawn.slick.state.StateBasedGame;
+
 import app.AppLoader;
 
 public final class Main {
 
-	public static final void main(String[] arguments) {
-		String title = "Telecom Party";
+	public static final void main(String[] arguments) throws SlickException {
+		String title = "Aztec Pyramids";
 		int width = 1280;
 		int height = 720;
 		boolean fullscreen = false;
@@ -32,31 +39,29 @@ public final class Main {
 		if (returnValue == -1) {
 			return;
 		}
-		fullscreen = returnValue == 0;
-		new AppGame(title, width, height, fullscreen) {
+		if (returnValue == 0) {
+			DisplayMode display = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDisplayMode();
+			width = display.getWidth();
+			height = display.getHeight();
+			fullscreen = true;
+		}
+		StateBasedGame game = new StateBasedGame(title) {
 
 			@Override
-			public void init() {
-				this.addState(new pages.Welcome(AppGame.PAGES_WELCOME));
-				this.addState(new pages.Games(AppGame.PAGES_GAMES));
-				this.addState(new pages.Players(AppGame.PAGES_PLAYERS));
-				this.addState(new pages.Pause(AppGame.PAGES_PAUSE));
-				this.addState(new games.telecomParty.World(AppGame.GAMES_TELECOM_PARTY_WORLD));
-				this.addState(new games.aztecPyramids.World(AppGame.GAMES_AZTEC_PYRAMIDS_WORLD));
-				this.addState(new games.bomberman.World(AppGame.GAMES_BOMBERMAN_WORLD));
-				this.addState(new games.clicker.World(AppGame.GAMES_CLICKER_WORLD));
-				this.addState(new games.codeFall.World(AppGame.GAMES_CODE_FALL_WORLD));
-				this.addState(new games.maze.World(AppGame.GAMES_MAZE_WORLD));
-				this.addState(new games.pacmanBattle.World(AppGame.GAMES_PACMAN_BATTLE_WORLD));
-				this.addState(new games.pathPainting.World(AppGame.GAMES_PATH_PAINTING_WORLD));
-				this.addState(new games.pong.World(AppGame.GAMES_PONG_WORLD));
-				this.addState(new games.preciseLock.World(AppGame.GAMES_PRECISE_LOCK_WORLD));
-				this.addState(new games.reflex.World(AppGame.GAMES_REFLEX_WORLD));
-				this.addState(new games.snake3000.World(AppGame.GAMES_SNAKE3000_WORLD));
-				this.addState(new games.t7Laser.World(AppGame.GAMES_T7_LASER_WORLD));
+			public void initStatesList(GameContainer container) {
+				this.addState(new pages.Welcome(0));
+				this.addState(new pages.Choice(1));
+				this.addState(new pages.Pause(2));
+				this.addState(new games.aztecPyramids.World(3));
 			}
 
 		};
+		AppGameContainer container = new AppGameContainer(game, width, height, fullscreen);
+		container.setTargetFrameRate(60);
+		container.setVSync(true);
+		container.setShowFPS(false);
+		container.setIcon(AppLoader.resolve("/images/icon.png"));
+		container.start();
 	}
 
 }

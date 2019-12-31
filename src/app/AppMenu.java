@@ -23,11 +23,6 @@ public abstract class AppMenu extends AppPage {
 		AppMenu.menuLineHeight = 30;
 	}
 
-	private boolean backFlag;
-	private boolean forwardFlag;
-	private boolean upFlag;
-	private boolean downFlag;
-
 	private List<MenuItem> menu;
 
 	private boolean menuVisibility;
@@ -59,11 +54,6 @@ public abstract class AppMenu extends AppPage {
 	public void init(GameContainer container, StateBasedGame game) {
 		super.init(container, game);
 
-		this.backFlag = false;
-		this.forwardFlag = false;
-		this.upFlag = false;
-		this.downFlag = false;
-
 		this.menuBoxX = this.contentX;
 		this.menuBoxY = this.subtitleBoxY + this.subtitleBoxHeight + AppPage.gap;
 		this.menuBoxWidth = this.contentWidth;
@@ -81,62 +71,33 @@ public abstract class AppMenu extends AppPage {
 	}
 
 	@Override
-	public final void poll(GameContainer container, StateBasedGame game, Input user) {
-		super.poll(container, game, user);
-		AppInput input =(AppInput) user;
-		this.backFlag = false;
-		this.forwardFlag = false;
-		this.upFlag = false;
-		this.downFlag = false;
-		AppGame appGame =(AppGame) game;
-		if (appGame.appPlayers.size() != 0) {
-			AppPlayer gameMaster = appGame.appPlayers.get(0);
-			int gameMasterID = gameMaster.getControllerID();
-			boolean BUTTON_A = input.isKeyDown(AppInput.KEY_ENTER) || input.isButtonPressed(AppInput.BUTTON_A, gameMasterID);
-			boolean BUTTON_B = input.isKeyDown(AppInput.KEY_ESCAPE) || input.isButtonPressed(AppInput.BUTTON_B, gameMasterID);
-			boolean KEY_UP = input.isKeyDown(AppInput.KEY_UP) || input.isControllerUp(gameMasterID);
-			boolean KEY_DOWN = input.isKeyDown(AppInput.KEY_DOWN) || input.isControllerDown(gameMasterID);
-			boolean BUTTON_UP = KEY_UP && !KEY_DOWN;
-			boolean BUTTON_DOWN = KEY_DOWN && !KEY_UP;
-			int gameMasterRecord = gameMaster.getButtonPressedRecord();
-			if (BUTTON_A == ((gameMasterRecord & AppInput.BUTTON_A) == 0)) {
-				gameMasterRecord ^= AppInput.BUTTON_A;
-				this.forwardFlag = BUTTON_A;
-			}
-			if (BUTTON_B == ((gameMasterRecord & AppInput.BUTTON_B) == 0)) {
-				gameMasterRecord ^= AppInput.BUTTON_B;
-				this.backFlag = BUTTON_B;
-			}
-			int BIT_UP = 1 << (input.getButtonCount(gameMasterID) + (AppInput.AXIS_YL << 1));
-			if (BUTTON_UP == ((gameMasterRecord & BIT_UP) == 0)) {
-				gameMasterRecord ^= BIT_UP;
-				this.upFlag = BUTTON_UP;
-			}
-			int BIT_DOWN = 1 << (input.getButtonCount(gameMasterID) + ((AppInput.AXIS_YL << 1) | 1));
-			if (BUTTON_DOWN == ((gameMasterRecord & BIT_DOWN) == 0)) {
-				gameMasterRecord ^= BIT_DOWN;
-				this.downFlag = BUTTON_DOWN;
-			}
-			gameMaster.setButtonPressedRecord(gameMasterRecord);
-		}
+	public void enter(GameContainer container, StateBasedGame game) {
+		container.getInput().clearKeyPressedRecord();
 	}
 
 	@Override
-	public final void update(GameContainer container, StateBasedGame game, int delta) {
+	public void update(GameContainer container, StateBasedGame game, int delta) {
 		super.update(container, game, delta);
-		if (this.forwardFlag) {
+		Input input = container.getInput();
+		boolean BUTTON_A = input.isKeyPressed(Input.KEY_ENTER);
+		boolean BUTTON_B = input.isKeyPressed(Input.KEY_ESCAPE);
+		boolean KEY_UP = input.isKeyPressed(Input.KEY_UP);
+		boolean KEY_DOWN = input.isKeyPressed(Input.KEY_DOWN);
+		boolean BUTTON_UP = KEY_UP && !KEY_DOWN;
+		boolean BUTTON_DOWN = KEY_DOWN && !KEY_UP;
+		if (BUTTON_A) {
 			int size = this.menu.size();
 			if (size != 0) {
 				this.menu.get(this.selectedItem).itemSelected();
 			}
 		}
-		if (this.backFlag) {
+		if (BUTTON_B) {
 			int size = this.menu.size();
 			if (size != 0) {
 				this.menu.get(size - 1).itemSelected();
 			}
 		}
-		if (this.upFlag) {
+		if (BUTTON_UP) {
 			if (this.selectedItem > 0) {
 				this.selectedItem--;
 				if (this.selectedItem == this.menuScrollY - 1) {
@@ -147,7 +108,7 @@ public abstract class AppMenu extends AppPage {
 				this.menuScrollY = menu.size() - this.menuScrollHeight;
 			}
 		}
-		if (this.downFlag) {
+		if (BUTTON_DOWN) {
 			if (this.selectedItem < menu.size() - 1) {
 				this.selectedItem++;
 				if (this.selectedItem == this.menuScrollY + this.menuScrollHeight) {

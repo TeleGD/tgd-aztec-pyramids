@@ -8,16 +8,13 @@ import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.Music;
 import org.newdawn.slick.SlickException;
+import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
 
-import app.AppState;
-
-public class World extends AppState {
-
-	private int compteur;
+public class World extends BasicGameState {
 
 	public final static String GAME_FOLDER_NAME="aztecPyramids";
-	public final static String DIRECTORY_SOUNDS="musics"+File.separator+GAME_FOLDER_NAME+File.separator;
+	public final static String DIRECTORY_SOUNDS="sounds"+File.separator+GAME_FOLDER_NAME+File.separator;
 	public final static String DIRECTORY_MUSICS="musics"+File.separator+GAME_FOLDER_NAME+File.separator;
 	public final static String DIRECTORY_IMAGES="images"+File.separator+GAME_FOLDER_NAME+File.separator;
 
@@ -29,8 +26,6 @@ public class World extends AppState {
 	private static Image aztecHead3;
 	private static Image aztecHead4;
 	private static Music soundMusicBackground;
-
-	public Player tabPlay[];
 
 	static {
 		try {
@@ -47,23 +42,51 @@ public class World extends AppState {
 		}
 	}
 
+	private int ID;
+	private int state;
+
+	private int compteur;
+	private Player tabPlay[];
+
 	public World(int ID) {
-		super(ID);
+		this.ID = ID;
+		this.state = 0;
 	}
 
 	@Override
-	public void init(GameContainer container, StateBasedGame arg1) {
-		this.tabPlay = new Player [] {new Player(this, Input.KEY_LEFT,Input.KEY_UP,Input.KEY_RIGHT),new Player(this, Input.KEY_A,Input.KEY_Z,Input.KEY_E)};
+	public int getID() {
+		return this.ID;
+	}
+
+	@Override
+	public void init(GameContainer container, StateBasedGame game) {
+		/* Méthode exécutée une unique fois au chargement du programme */
 	}
 
 	@Override
 	public void enter(GameContainer container, StateBasedGame game){
-		//Ici mettre tous les chargement d'image, creation de perso/decor et autre truc qui mettent du temps
-		soundMusicBackground.loop(1,1f);
+		/* Méthode exécutée à l'apparition de la page */
+		if (this.state == 0) {
+			this.play(container, game);
+		} else if (this.state == 2) {
+			this.resume(container, game);
+		}
+	}
+
+	@Override
+	public void leave(GameContainer container, StateBasedGame game) {
+		/* Méthode exécutée à la disparition de la page */
+		if (this.state == 1) {
+			this.pause(container, game);
+		} else if (this.state == 3) {
+			this.stop(container, game);
+			this.state = 0; // TODO: remove
+		}
 	}
 
 	@Override
 	public void update(GameContainer container, StateBasedGame game, int delta) {
+		/* Méthode exécutée environ 60 fois par seconde */
 		compteur += delta;
 
 		if (compteur == 5000) {
@@ -108,10 +131,11 @@ public class World extends AppState {
 
 	@Override
 	public void render(GameContainer container, StateBasedGame game, Graphics g) {
+		/* Méthode exécutée environ 60 fois par seconde */
 		g.drawImage(aztecPyramid,0,0);
 		g.drawImage(aztecCalendar,1080,0);
 		g.drawImage(aztecSnake,1080,610);
-		g.drawString("AZTEC PYRAMID",1120,220);
+		g.drawString("AZTEC PYRAMIDS",1120,220);
 		g.drawString("Score :",1150,250);
 		g.drawImage(aztecHead1,500,600-this.tabPlay[0].getFloor()*40);
 		g.drawImage(aztecHead2,480,600-this.tabPlay[1].getFloor()*40);
@@ -144,15 +168,40 @@ public class World extends AppState {
 
 	}
 
+	public void play(GameContainer container, StateBasedGame game) {
+		/* Méthode exécutée une unique fois au début du jeu */
+		this.tabPlay = new Player [] {new Player(this, Input.KEY_LEFT,Input.KEY_UP,Input.KEY_RIGHT),new Player(this, Input.KEY_A,Input.KEY_Z,Input.KEY_E)};
+		soundMusicBackground.loop(1, 1f);
+	}
+
+	public void pause(GameContainer container, StateBasedGame game) {
+		/* Méthode exécutée lors de la mise en pause du jeu */
+		soundMusicBackground.pause();
+	}
+
+	public void resume(GameContainer container, StateBasedGame game) {
+		/* Méthode exécutée lors de la reprise du jeu */
+		soundMusicBackground.resume();
+	}
+
+	public void stop(GameContainer container, StateBasedGame game) {
+		/* Méthode exécutée une unique fois à la fin du jeu */
+		soundMusicBackground.stop();
+	}
+
+	public void setState(int state) {
+		this.state = state;
+	}
+
+	public int getState() {
+		return this.state;
+	}
+
 	@Override
 	public void keyPressed(int key, char c) {
-		if(key==Input.KEY_SPACE){
-			System.exit(0);
-			}
 		for (int j=0;j<this.tabPlay.length;j++){
 			this.tabPlay[j].keyPressed(key,c);
 		}
-
 	}
 
 }
