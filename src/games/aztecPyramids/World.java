@@ -1,22 +1,22 @@
 package games.aztecPyramids;
 
-import java.io.File;
-
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
-import org.newdawn.slick.Music;
-import org.newdawn.slick.SlickException;
+import org.newdawn.slick.openal.Audio;
 import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
+import org.newdawn.slick.state.transition.FadeInTransition;
+import org.newdawn.slick.state.transition.FadeOutTransition;
+
+import app.AppLoader;
 
 public class World extends BasicGameState {
 
-	public final static String GAME_FOLDER_NAME="aztecPyramids";
-	public final static String DIRECTORY_SOUNDS="sounds"+File.separator+GAME_FOLDER_NAME+File.separator;
-	public final static String DIRECTORY_MUSICS="musics"+File.separator+GAME_FOLDER_NAME+File.separator;
-	public final static String DIRECTORY_IMAGES="images"+File.separator+GAME_FOLDER_NAME+File.separator;
+	public final static String DIRECTORY_SOUNDS="/sounds/aztecPyramids/";
+	public final static String DIRECTORY_MUSICS="/musics/aztecPyramids/";
+	public final static String DIRECTORY_IMAGES="/images/aztecPyramids/";
 
 	private static Image aztecPyramid;
 	private static Image aztecCalendar;
@@ -25,21 +25,19 @@ public class World extends BasicGameState {
 	private static Image aztecHead2;
 	private static Image aztecHead3;
 	private static Image aztecHead4;
-	private static Music soundMusicBackground;
+	private static Audio soundMusicBackground;
+
+	private float soundMusicBackgroundPos;
 
 	static {
-		try {
-			aztecPyramid = new Image(DIRECTORY_IMAGES+"aztec.jpg");
-			aztecCalendar = new Image(DIRECTORY_IMAGES+"aztec-calendar.jpg");
-			aztecSnake = new Image(DIRECTORY_IMAGES+"snake.jpg");
-			aztecHead1 = new Image(DIRECTORY_IMAGES+"bluehead.png");
-			aztecHead2 = new Image(DIRECTORY_IMAGES+"pinkhead.png");
-			aztecHead3 = new Image(DIRECTORY_IMAGES+"yellowhead.png");
-			aztecHead4 = new Image(DIRECTORY_IMAGES+"greenhead.png");
-			soundMusicBackground=new Music(DIRECTORY_MUSICS+"Kinski-Song.ogg");
-		} catch (SlickException e) {
-			e.printStackTrace();
-		}
+		aztecPyramid = AppLoader.loadPicture(DIRECTORY_IMAGES+"aztec.jpg");
+		aztecCalendar = AppLoader.loadPicture(DIRECTORY_IMAGES+"aztec-calendar.jpg");
+		aztecSnake = AppLoader.loadPicture(DIRECTORY_IMAGES+"snake.jpg");
+		aztecHead1 = AppLoader.loadPicture(DIRECTORY_IMAGES+"bluehead.png");
+		aztecHead2 = AppLoader.loadPicture(DIRECTORY_IMAGES+"pinkhead.png");
+		aztecHead3 = AppLoader.loadPicture(DIRECTORY_IMAGES+"yellowhead.png");
+		aztecHead4 = AppLoader.loadPicture(DIRECTORY_IMAGES+"greenhead.png");
+		soundMusicBackground=AppLoader.loadAudio(DIRECTORY_MUSICS+"Kinski-Song.ogg");
 	}
 
 	private int ID;
@@ -87,6 +85,10 @@ public class World extends BasicGameState {
 	@Override
 	public void update(GameContainer container, StateBasedGame game, int delta) {
 		/* Méthode exécutée environ 60 fois par seconde */
+		Input input = container.getInput();
+		if (input.isKeyDown(Input.KEY_ESCAPE)) {
+			game.enterState(2, new FadeOutTransition(), new FadeInTransition());
+		}
 		compteur += delta;
 
 		if (compteur == 5000) {
@@ -170,18 +172,21 @@ public class World extends BasicGameState {
 
 	public void play(GameContainer container, StateBasedGame game) {
 		/* Méthode exécutée une unique fois au début du jeu */
+		this.compteur = 0;
 		this.tabPlay = new Player [] {new Player(this, Input.KEY_LEFT,Input.KEY_UP,Input.KEY_RIGHT),new Player(this, Input.KEY_A,Input.KEY_Z,Input.KEY_E)};
-		soundMusicBackground.loop(1, 1f);
+		soundMusicBackground.playAsMusic(1f, 1f, true);
 	}
 
 	public void pause(GameContainer container, StateBasedGame game) {
 		/* Méthode exécutée lors de la mise en pause du jeu */
-		soundMusicBackground.pause();
+		soundMusicBackgroundPos = soundMusicBackground.getPosition();
+		soundMusicBackground.stop();
 	}
 
 	public void resume(GameContainer container, StateBasedGame game) {
 		/* Méthode exécutée lors de la reprise du jeu */
-		soundMusicBackground.resume();
+		soundMusicBackground.playAsMusic(1, 1f, true);
+		soundMusicBackground.setPosition(soundMusicBackgroundPos);
 	}
 
 	public void stop(GameContainer container, StateBasedGame game) {
